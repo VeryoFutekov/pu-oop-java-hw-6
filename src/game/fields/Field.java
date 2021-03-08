@@ -33,10 +33,9 @@ public class Field {
 
     }
 
-
-
-
-
+    public Color getColor() {
+        return color;
+    }
 
     public int getX() {
         return x / Constants.FIELD_SIZE;
@@ -63,10 +62,10 @@ public class Field {
     }
 
     public void setX(int x) {
-        this.x = x;
+        this.x = x * Constants.FIELD_SIZE;
     }
 
     public void setY(int y) {
-        this.y = y;
+        this.y = y * Constants.FIELD_SIZE;
     }
 }
