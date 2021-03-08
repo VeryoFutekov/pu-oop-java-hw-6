@@ -3,6 +3,7 @@ package game;
 import game.fields.Death;
 import game.fields.Field;
 import game.fields.Food;
+import game.snake.Body;
 import game.snake.Snake;
 
 import javax.swing.*;
@@ -24,6 +25,8 @@ public class Window extends JFrame implements ActionListener {
 
     public Window() throws HeadlessException {
         timer = new Timer(2000, this);
+
+
         super.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -132,9 +135,6 @@ public class Window extends JFrame implements ActionListener {
         }
     }
 
-    private void move() {
-
-    }
 
     ;
 
@@ -143,6 +143,7 @@ public class Window extends JFrame implements ActionListener {
         Field head = this.snake.getCell(0);
         int headX = head.getX();
         int headY = head.getY();
+
         Point nextPositions = findNextPosition(headX, headY);
 
         if (nextPositions == null) {
@@ -150,12 +151,63 @@ public class Window extends JFrame implements ActionListener {
         }
 
         nextPositions = validatePositions(nextPositions);
-        int nextPositionX=nextPositions.x;
-        int nextPositionY=nextPositions.y;
+        int nextPositionX = nextPositions.x;
+        int nextPositionY = nextPositions.y;
 
 
-        this.move();
+        this.move(nextPositionX, nextPositionY, headX, headY);
 
+        repaint();
+
+    }
+
+    private void move(int nextPositionX, int nextPositionY, int currentPX, int currentPY) {
+        Field targetCell = fields[nextPositionY][nextPositionX];
+
+        if (targetCell instanceof Body || targetCell instanceof Death) {
+            showModal();
+        } else if (targetCell instanceof Food) {
+            points += 15;
+        }
+
+        setHeadPositions(nextPositionX, nextPositionY, currentPX, currentPY);
+
+        int counter = 0;
+
+
+        while (counter < snake.getSize() - 1) {
+            Field previous = snake.getCell(counter);
+            Field next = snake.getCell(counter + 1);
+
+            next.setPreviousX(next.getX());
+            next.setPreviousY(next.getY());
+
+            next.setX(previous.getPreviousX());
+            next.setY(previous.getPreviousY());
+
+            fields[previous.getY()][previous.getX()] = previous;
+            fields[next.getY()][next.getX()] = next;
+
+            counter++;
+
+        }
+
+
+        Field lastPart = snake.getCell(snake.getSize() - 1);
+        fields[lastPart.getY()][lastPart.getX()] = lastPart;
+        fields[lastPart.getPreviousY()][lastPart.getPreviousX()] = null;
+
+
+    }
+
+    private void setHeadPositions(int nextPositionX, int nextPositionY, int currentPX, int currentPositionY) {
+        snake.getCell(0).setPreviousX(currentPX);
+        snake.getCell(0).setPreviousY(currentPositionY);
+        snake.getCell(0).setX(nextPositionX);
+        snake.getCell(0).setY(nextPositionY);
+    }
+
+    private void showModal() {
     }
 
 
@@ -180,39 +232,35 @@ public class Window extends JFrame implements ActionListener {
         return new Point(nextPositionX, nextPositionY);
     }
 
-    private int validateCoordinate(int number) {
-        if (number == 8) {
-            number = 0;
-        } else if (number == -1) {
-            number = 7;
-        }
-
-        return number;
-    }
 
     private Point findNextPosition(int headX, int headY) {
         int nextHeadPositionX;
         int nextHeadPositionY;
 
 
-        if (direction.equals("left")) {
-            nextHeadPositionX = headX - 1;
-            nextHeadPositionY = headY;
+        switch (direction) {
+            case "left":
+                nextHeadPositionX = headX - 1;
+                nextHeadPositionY = headY;
 
-        } else if (direction.equals("right")) {
-            nextHeadPositionX = headX + 1;
-            nextHeadPositionY = headY;
+                break;
+            case "right":
+                nextHeadPositionX = headX + 1;
+                nextHeadPositionY = headY;
 
-        } else if (direction.equals("down")) {
-            nextHeadPositionY = headY + 1;
-            nextHeadPositionX = headX;
+                break;
+            case "down":
+                nextHeadPositionY = headY + 1;
+                nextHeadPositionX = headX;
 
-        } else if (direction.equals("up")) {
-            nextHeadPositionY = headY - 1;
-            nextHeadPositionX = headX;
+                break;
+            case "up":
+                nextHeadPositionY = headY - 1;
+                nextHeadPositionX = headX;
 
-        } else {
-            return null;
+                break;
+            default:
+                return null;
         }
 
         return new Point(nextHeadPositionX, nextHeadPositionY);

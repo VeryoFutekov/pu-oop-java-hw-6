@@ -21,4 +21,10 @@ public class Snake {
     public Field getCell(int index) {
         return this.body.get(index);
     }
+
+    public int getSize(){
+        return this.body.size();
+    }
+
+
 }
